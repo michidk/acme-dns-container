@@ -1,0 +1,71 @@
+name: Bump Version
+
+# checkov:skip=CKV_GHA_7: Input is constrained to semantic-version increments.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  bump:
+    name: Commit version and tag
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Calculate next version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          current="$(awk '$1 == "version:" { print $2; exit }' charts/acme-dns/Chart.yaml)"
+          IFS=. read -r major minor patch <<<"$current"
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          next="$major.$minor.$patch"
+          sed -i "0,/^version: .*/s//version: $next/" charts/acme-dns/Chart.yaml
+          echo "tag=v$next" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and tag
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add charts/acme-dns/Chart.yaml
+          git commit -m "chore(release): $TAG"
+          git tag "$TAG"
+          git push origin main "$TAG"
+
+  publish:
+    name: Publish release
+    needs: bump
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.bump.outputs.tag }}
+    secrets: inherit

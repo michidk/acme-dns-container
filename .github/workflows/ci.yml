@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  container:
+    name: Container
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Build image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          load: true
+          push: false
+          tags: acme-dns:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test entrypoint
+        run: docker run --rm acme-dns:ci -h
+
+      - name: Smoke test DNS, API, and SQLite
+        run: ./scripts/smoke-test.sh acme-dns:ci
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: acme-dns:ci
+          scanners: vuln
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+  chart:
+    name: Helm chart
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        with:
+          version: v3.19.0
+
+      - name: Lint
+        run: helm lint --strict charts/acme-dns
+
+      - name: Render generated configuration
+        run: helm template acme-dns charts/acme-dns --namespace acme-dns > /tmp/acme-dns.yaml
+
+      - name: Validate Kubernetes resources
+        run: >-
+          docker run --rm --interactive
+          ghcr.io/yannh/kubeconform:v0.7.0-alpine@sha256:8f0eeaaa96ba27ba1500b0e4b1c215acc358d159c62a7ecae58d7a03403287b0
+          -strict -summary -ignore-missing-schemas
+          < /tmp/acme-dns.yaml
+
+      - name: Render existing ConfigMap without persistence
+        run: >-
+          helm template acme-dns charts/acme-dns --namespace acme-dns
+          --set config.existingConfigMap=acme-dns-config
+          --set persistence.enabled=false
+          >/dev/null
+
+      - name: Render existing Secret and claim
+        run: >-
+          helm template acme-dns charts/acme-dns --namespace acme-dns
+          --set config.existingSecret=acme-dns-config
+          --set persistence.existingClaim=acme-dns-data
+          >/dev/null
+
+      - name: Reject conflicting configuration sources
+        run: |
+          if helm template acme-dns charts/acme-dns \
+            --set config.existingConfigMap=a \
+            --set config.existingSecret=b >/dev/null 2>&1; then
+            echo "expected conflicting configuration sources to fail" >&2
+            exit 1
+          fi
+
+      - name: Reject multiple SQLite replicas
+        run: |
+          if helm template acme-dns charts/acme-dns \
+            --set replicaCount=2 >/dev/null 2>&1; then
+            echo "expected multiple SQLite replicas to fail" >&2
+            exit 1
+          fi
+
+      - name: Package
+        run: helm package charts/acme-dns --destination /tmp
+
+  metadata:
+    name: Repository metadata
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate JSON
+        run: jq empty renovate.json charts/acme-dns/values.schema.json
+
+      - name: Validate upstream source pin
+        run: ./scripts/verify-upstream.sh
+
+      - name: Validate workflows
+        run: >-
+          docker run --rm
+          --volume "$PWD:/work"
+          --workdir /work
+          rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9
+
+      - name: Validate shell scripts
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
+
+  hadolint:
+    name: Hadolint
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@2a66e89f53d0771bb131a7fa31f3136336094aa6 # v3.4.0
+        with:
+          dockerfile: Dockerfile

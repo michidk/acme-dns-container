@@ -1,0 +1,21 @@
+acme-dns has been installed.
+
+{{- if .Values.service.dns.enabled }}
+DNS service:
+  {{ include "acme-dns.fullname" . }}-dns
+{{- end }}
+
+{{- if .Values.service.api.enabled }}
+Private API service:
+  http://{{ include "acme-dns.fullname" . }}-api.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.api.port }}
+{{- end }}
+
+{{- if and (not .Values.config.existingConfigMap) (not .Values.config.existingSecret) }}
+Delegate {{ .Values.config.general.domain }} to the stable external address of
+the DNS service. Keep the registration and update API private unless you have
+explicitly designed authenticated network access for it.
+{{- else }}
+Delegate the configured authoritative zone to the stable external address of
+the DNS service. Keep the registration and update API private unless you have
+explicitly designed authenticated network access for it.
+{{- end }}

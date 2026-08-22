@@ -1,0 +1,19 @@
+apiVersion: v2
+name: acme-dns
+description: A focused authoritative DNS server and API for ACME DNS-01 challenges
+type: application
+version: 0.1.0
+appVersion: "2.0.2"
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/michidk/acme-dns
+sources:
+  - https://github.com/michidk/acme-dns
+  - https://github.com/acme-dns/acme-dns
+maintainers:
+  - name: michidk
+    url: https://github.com/michidk
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Upstream
+      url: https://github.com/acme-dns/acme-dns

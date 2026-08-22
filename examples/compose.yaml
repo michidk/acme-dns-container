@@ -1,0 +1,19 @@
+services:
+  acme-dns:
+    image: ghcr.io/michidk/acme-dns:latest
+    restart: unless-stopped
+    ports:
+      - "53:5353/tcp"
+      - "53:5353/udp"
+      - "127.0.0.1:8080:8080/tcp"
+    volumes:
+      - ./config.cfg:/etc/acme-dns/config.cfg:ro
+      - acme-dns-data:/var/lib/acme-dns
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  acme-dns-data:

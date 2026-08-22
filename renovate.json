@@ -1,0 +1,103 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":configMigration",
+    ":enableVulnerabilityAlertsWithLabel('security')"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "packageRules": [
+    {
+      "description": "Keep container base image updates together",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchFileNames": [
+        "Dockerfile"
+      ],
+      "groupName": "container base images"
+    },
+    {
+      "description": "Automerge digest-only refreshes after CI",
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Keep GitHub Actions pinned to immutable commits",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "pinDigests": true
+    },
+    {
+      "description": "Update the upstream version and source commit together",
+      "matchPackageNames": [
+        "acme-dns/acme-dns"
+      ],
+      "groupName": "upstream acme-dns"
+    },
+    {
+      "description": "Keep downstream Go security overrides together",
+      "matchPackageNames": [
+        "golang.org/x/crypto",
+        "golang.org/x/net",
+        "golang.org/x/text"
+      ],
+      "groupName": "Go security overrides"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track upstream acme-dns releases",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[^ ]+) depName=(?<depName>[^ ]+) versioning=(?<versioning>[^\\n]+)\\nARG ACME_DNS_VERSION=(?<currentValue>v[^\\s]+)\\nARG ACME_DNS_COMMIT=(?<currentDigest>[a-f0-9]{40})"
+      ],
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Keep the chart appVersion aligned with upstream",
+      "managerFilePatterns": [
+        "/^charts/acme-dns/Chart\\.yaml$/"
+      ],
+      "matchStrings": [
+        "appVersion: \\\"(?<currentValue>[^\\\"]+)\\\""
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "acme-dns/acme-dns",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Track downstream Go security overrides",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>go) depName=(?<depName>[^\\n]+)\\nARG GO_[A-Z_]+_VERSION=(?<currentValue>v[^\\s]+)"
+      ],
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Track tool images used by local verification",
+      "managerFilePatterns": [
+        "/^justfile$/"
+      ],
+      "matchStrings": [
+        "[a-z_]+_image := \\\"(?<depName>[^:]+):(?<currentValue>[^@]+)@(?<currentDigest>sha256:[a-f0-9]+)\\\""
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}

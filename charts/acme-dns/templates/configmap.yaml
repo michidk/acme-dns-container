@@ -1,0 +1,48 @@
+{{- if and (not .Values.config.existingConfigMap) (not .Values.config.existingSecret) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "acme-dns.configName" . }}
+  labels:
+    {{- include "acme-dns.labels" . | nindent 4 }}
+data:
+  config.cfg: |
+    [general]
+    listen = {{ .Values.config.general.listen | quote }}
+    protocol = {{ .Values.config.general.protocol | quote }}
+    domain = {{ .Values.config.general.domain | quote }}
+    nsname = {{ .Values.config.general.nsname | quote }}
+    nsadmin = {{ .Values.config.general.nsadmin | quote }}
+    records = [
+    {{- range .Values.config.general.records }}
+      {{ . | quote }},
+    {{- end }}
+    ]
+    debug = {{ .Values.config.general.debug }}
+
+    [database]
+    engine = {{ .Values.config.database.engine | quote }}
+    connection = {{ .Values.config.database.connection | quote }}
+
+    [api]
+    ip = {{ .Values.config.api.ip | quote }}
+    port = {{ .Values.config.api.port | toString | quote }}
+    disable_registration = {{ .Values.config.api.disableRegistration }}
+    tls = {{ .Values.config.api.tls | quote }}
+    tls_cert_privkey = {{ .Values.config.api.tlsCertPrivateKey | quote }}
+    tls_cert_fullchain = {{ .Values.config.api.tlsCertFullchain | quote }}
+    acme_cache_dir = {{ .Values.config.api.acmeCacheDir | quote }}
+    notification_email = {{ .Values.config.api.notificationEmail | quote }}
+    corsorigins = [
+    {{- range .Values.config.api.corsOrigins }}
+      {{ . | quote }},
+    {{- end }}
+    ]
+    use_header = {{ .Values.config.api.useHeader }}
+    header_name = {{ .Values.config.api.headerName | quote }}
+
+    [logconfig]
+    loglevel = {{ .Values.config.log.level | quote }}
+    logtype = {{ .Values.config.log.type | quote }}
+    logformat = {{ .Values.config.log.format | quote }}
+{{- end }}

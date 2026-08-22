@@ -1,0 +1,11 @@
+.git
+.github
+.dist
+charts
+docs
+examples
+AGENTS.md
+LICENSE
+README.md
+justfile
+renovate.json
