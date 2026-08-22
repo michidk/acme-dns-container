@@ -99,7 +99,7 @@ Tagged images are signed keylessly by GitHub Actions. Verify one with Cosign:
 
 ```sh
 cosign verify ghcr.io/michidk/acme-dns:0.1.0 \
-  --certificate-identity-regexp='https://github.com/michidk/acme-dns/.github/workflows/release.yml@refs/tags/v0.1.0' \
+  --certificate-identity-regexp='^https://github\.com/michidk/acme-dns(-container)?/\.github/workflows/release\.yml@refs/tags/v0\.1\.0$' \
   --certificate-oidc-issuer='https://token.actions.githubusercontent.com'
 ```
 

@@ -5,9 +5,9 @@ type: application
 version: 0.1.0
 appVersion: "2.0.2"
 kubeVersion: ">=1.25.0-0"
-home: https://github.com/michidk/acme-dns
+home: https://github.com/michidk/acme-dns-container
 sources:
-  - https://github.com/michidk/acme-dns
+  - https://github.com/michidk/acme-dns-container
   - https://github.com/acme-dns/acme-dns
 maintainers:
   - name: michidk

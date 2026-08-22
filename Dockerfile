@@ -46,9 +46,9 @@ ARG ACME_DNS_VERSION
 LABEL org.opencontainers.image.title="acme-dns" \
       org.opencontainers.image.description="Hardened container packaging for acme-dns" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/michidk/acme-dns" \
+      org.opencontainers.image.source="https://github.com/michidk/acme-dns-container" \
       org.opencontainers.image.vendor="michidk" \
-      org.opencontainers.image.url="https://github.com/michidk/acme-dns" \
+      org.opencontainers.image.url="https://github.com/michidk/acme-dns-container" \
       org.opencontainers.image.version="${ACME_DNS_VERSION}"
 
 COPY --from=build /out/acme-dns /usr/local/bin/acme-dns
