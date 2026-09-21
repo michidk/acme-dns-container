@@ -1,6 +1,6 @@
-# syntax=docker/dockerfile:1.18
+# syntax=docker/dockerfile:1.27
 
-FROM golang:1.25.14-alpine3.23@sha256:27b3069b25647beacd3745b0b2c83e2f9b8d3935455a32cd4531236ee1c960e0 AS build
+FROM golang:1.27.1-alpine3.23@sha256:0908ac9b9319e09d7c238aabe914e0395c51d63c4e3d0ae8c554fda9158a5769 AS build
 
 # The tag is human-readable provenance; the immutable commit is what is built.
 # Renovate updates both from the same upstream tag.
