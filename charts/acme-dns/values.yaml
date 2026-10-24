@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/michidk/acme-dns
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "@sha256:6ace999a126779ed1dd433b8583ff3561a085327f89b0974404aa1350e0e5d99"
 
 imagePullSecrets: []
 nameOverride: ""
