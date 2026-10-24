@@ -5,16 +5,6 @@
   ],
   "packageRules": [
     {
-      "description": "Keep container base image updates together",
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchFileNames": [
-        "Dockerfile"
-      ],
-      "groupName": "container base images"
-    },
-    {
       "description": "Automerge digest-only refreshes after CI",
       "matchUpdateTypes": [
         "digest"
