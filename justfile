@@ -13,7 +13,7 @@ default:
 verify: verify-static verify-image
 
 verify-static:
-    @jq empty renovate.json charts/acme-dns/values.schema.json
+    @jq empty .github/renovate.json5 charts/acme-dns/values.schema.json
     @./scripts/verify-upstream.sh
     @docker run --rm -i {{ hadolint_image }} < Dockerfile
     @docker run --rm -v "{{ justfile_directory() }}:/work" -w /work {{ shellcheck_image }} scripts/*.sh

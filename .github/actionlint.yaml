@@ -1,0 +1,4 @@
+# The hosted runner is available before actionlint's built-in label list catches up.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04

@@ -37,7 +37,7 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
         - name: acme-dns
-          image: "{{ .Values.image.repository }}:{{ default .Chart.Version .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}{{ if not (hasPrefix "@" .Values.image.tag) }}:{{ end }}{{ default .Chart.Version .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - -c
