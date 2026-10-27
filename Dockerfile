@@ -12,7 +12,7 @@ ARG ACME_DNS_COMMIT=4e5a69e5fb742dde4f755b7f56aee2aea76e19bf
 # renovate: datasource=go depName=golang.org/x/crypto
 ARG GO_X_CRYPTO_VERSION=v0.58.0
 # renovate: datasource=go depName=golang.org/x/net
-ARG GO_X_NET_VERSION=v0.61.0
+ARG GO_X_NET_VERSION=v0.62.0
 # renovate: datasource=go depName=golang.org/x/text
 ARG GO_X_TEXT_VERSION=v0.43.0
 
