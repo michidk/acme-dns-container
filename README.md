@@ -1,5 +1,8 @@
 # acme-dns container and Helm chart
 
+[![CI](https://github.com/michidk/acme-dns-container/actions/workflows/ci.yml/badge.svg)](https://github.com/michidk/acme-dns-container/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Production-oriented container packaging and a Kubernetes Helm chart for
 [acme-dns](https://github.com/acme-dns/acme-dns), the narrowly scoped DNS server
 for ACME DNS-01 challenges.
@@ -7,6 +10,9 @@ for ACME DNS-01 challenges.
 This is an unofficial packaging project. The application itself is developed
 upstream; this repository owns the non-root multi-architecture image, Helm
 deployment, CI, and release automation.
+
+[Docker Compose](#docker-compose) · [Helm](#helm) · [DNS setup](#dns-setup) ·
+[Image verification](#image-verification) · [Development](#development)
 
 ## What you get
 
